@@ -1,6 +1,0 @@
-{
-  "name": "jee-console-webapp",
-  "version": "1.0.0",
-  "private": true,
-  "description": "JEE practice web app with a backend-proxied AI tutor"
-}
