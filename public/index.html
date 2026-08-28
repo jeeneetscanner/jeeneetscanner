@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JEE·NEET Console</title>
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0a1220" />
+<link rel="icon" href="/icons/icon-192.png" />
+<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg: #0a1220;
+  --panel: #101c30;
+  --panel-2: #0d1729;
+  --grid-line: rgba(94,234,212,0.06);
+  --ink: #e7edf6;
+  --ink-dim: #8ea0b8;
+  --accent: #5eead4;
+  --accent-dim: #2f6f66;
+  --amber: #ffb454;
+  --good: #4ade80;
+  --bad: #fb7185;
+  --border: #1c2c46;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/40px 40px,
+    var(--bg);
+  color:var(--ink);
+  font-family:'Manrope', sans-serif;
+  min-height:100vh;
+  padding:24px 16px 60px;
+}
+.wrap{max-width:720px;margin:0 auto;}
+
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px; flex-wrap:wrap; gap:10px;
+}
+.wordmark{
+  font-family:'IBM Plex Mono', monospace;
+  font-weight:700; font-size:15px; letter-spacing:0.14em;
+  color:var(--accent); text-transform:uppercase;
+}
+.wordmark span{color:var(--ink-dim);}
+.stats{
+  font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-dim);
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap; row-gap:10px;
+}
+.stats b{color:var(--ink); font-weight:600;}
+
+.exam-toggle{
+  display:flex; gap:2px; background:var(--panel); border:1px solid var(--border);
+  border-radius:999px; padding:3px; font-family:'IBM Plex Mono', monospace;
+}
+.exam-toggle button{
+  border:none; background:transparent; color:var(--ink-dim); font-weight:700;
+  font-size:12px; letter-spacing:0.06em; padding:8px 16px; min-height:36px; border-radius:999px;
+  cursor:pointer; transition:background .15s, color .15s;
+}
+.exam-toggle button.active{background:var(--accent); color:#0b0f0d;}
+
+.home-grid{display:flex; flex-direction:column; gap:12px; margin-bottom:20px;}
+.subject-card{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  padding:20px 22px; cursor:pointer; transition:border-color .15s, transform .15s;
+  text-align:left; color:var(--ink); font-family:'Manrope', sans-serif; width:100%;
+}
+.subject-card:hover{border-color:var(--accent-dim); transform:translateX(2px);}
+.subject-card .sc-left{display:flex; align-items:center; gap:16px;}
+.subject-card .sc-icon{
+  font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:15px;
+  width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--border); flex-shrink:0;
+}
+.subject-card.Physics .sc-icon{color:#7dd3fc; border-color:#7dd3fc;}
+.subject-card.Chemistry .sc-icon{color:var(--amber); border-color:var(--amber);}
+.subject-card.Maths .sc-icon{color:var(--accent); border-color:var(--accent);}
+.subject-card.Biology .sc-icon{color:#86efac; border-color:#86efac;}
+.subject-card.All .sc-icon{color:#c4b5fd; border-color:#c4b5fd;}
+.subject-card .sc-title{font-weight:700; font-size:16px; color:var(--ink);}
+.subject-card .sc-sub{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-dim); margin-top:3px;}
+.subject-card .sc-acc{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-dim); text-align:right;}
+.subject-card .sc-acc b{color:var(--ink); display:block; font-size:17px;}
+.backbtn{
+  font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--ink-dim); background:none; border:none; cursor:pointer; padding:0 0 14px; display:inline-flex; align-items:center; gap:4px;
+}
+.backbtn:hover{color:var(--accent);}
+.hidden{display:none !important;}
+
+.tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+.tab{
+  font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.06em;
+  text-transform:uppercase; padding:9px 14px; border-radius:20px; min-height:36px;
+  border:1px solid var(--border); color:var(--ink-dim); cursor:pointer;
+  background:var(--panel); transition:all .15s; display:inline-flex; align-items:center;
+}
+.tab:hover{border-color:var(--accent-dim); color:var(--ink);}
+.tab.active{background:var(--accent); color:#062420; border-color:var(--accent); font-weight:700;}
+
+.progress-track{
+  height:3px; background:var(--border); border-radius:3px; overflow:hidden; margin-bottom:22px;
+}
+.progress-fill{height:100%; background:var(--accent); transition:width .3s;}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:26px 24px;
+  position:relative;
+  overflow:hidden;
+}
+.eyebrow{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-dim);
+  text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px;
+}
+.eyebrow .qid{color:var(--accent);}
+.diff{padding:2px 8px; border-radius:10px; border:1px solid var(--border); font-size:10px;}
+.diff.Easy{color:var(--good); border-color:var(--good);}
+.diff.Medium{color:var(--amber); border-color:var(--amber);}
+.diff.Hard{color:var(--bad); border-color:var(--bad);}
+
+.qtext{font-size:18px; line-height:1.55; font-weight:600; margin-bottom:20px;}
+
+.options{display:flex; flex-direction:column; gap:10px; margin-bottom:6px;}
+.opt{
+  display:flex; align-items:center; gap:12px;
+  padding:14px; border-radius:10px; border:1px solid var(--border); min-height:44px;
+  background:var(--panel-2); cursor:pointer; font-size:15px; text-align:left;
+  transition:border-color .15s, background .15s;
+}
+.opt:hover:not(.locked){border-color:var(--accent-dim);}
+.opt .letter{
+  font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:12px;
+  width:22px; height:22px; border-radius:6px; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--ink-dim);
+}
+.opt.selected{border-color:var(--accent);}
+.opt.selected .letter{border-color:var(--accent); color:var(--accent);}
+.opt.correct{border-color:var(--good); background:rgba(74,222,128,0.08);}
+.opt.correct .letter{border-color:var(--good); color:var(--good); background:rgba(74,222,128,0.15);}
+.opt.wrong{border-color:var(--bad); background:rgba(251,113,133,0.08);}
+.opt.wrong .letter{border-color:var(--bad); color:var(--bad); background:rgba(251,113,133,0.15);}
+.opt.locked{cursor:default;}
+
+.actionbar{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+button.btn{
+  font-family:'Manrope', sans-serif; font-weight:700; font-size:13px;
+  padding:12px 18px; border-radius:9px; border:1px solid var(--border); min-height:44px;
+  background:var(--panel-2); color:var(--ink); cursor:pointer; transition:all .15s;
+}
+button.btn:hover:not(:disabled){border-color:var(--accent);}
+button.btn:disabled{opacity:0.35; cursor:not-allowed;}
+button.btn.primary{background:var(--accent); color:#062420; border-color:var(--accent);}
+button.btn.primary:hover:not(:disabled){filter:brightness(1.08);}
+button.btn.ghost{background:transparent;}
+button.btn.next{margin-left:auto;}
+
+.console{
+  margin-top:18px; background:#060d18; border:1px solid var(--border);
+  border-radius:10px; padding:14px 16px; font-family:'IBM Plex Mono', monospace;
+  font-size:12.5px; line-height:1.65; color:#a8f5e6; display:none;
+  max-height:300px; overflow-y:auto; white-space:pre-wrap;
+}
+.console.show{display:block;}
+.console .tag{color:var(--ink-dim); display:block; margin-bottom:6px; letter-spacing:0.06em;}
+.cursor{display:inline-block; width:7px; height:13px; background:var(--accent); animation:blink 1s step-start infinite; vertical-align:text-bottom;}
+@keyframes blink{50%{opacity:0;}}
+
+.result-banner{
+  margin-top:14px; padding:10px 14px; border-radius:9px; font-size:13px; font-weight:700;
+  display:none; align-items:center; gap:8px;
+}
+.result-banner.correct{display:flex; background:rgba(74,222,128,0.1); color:var(--good); border:1px solid var(--good);}
+.result-banner.wrong{display:flex; background:rgba(251,113,133,0.1); color:var(--bad); border:1px solid var(--bad);}
+
+.addpanel{
+  background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  padding:22px; display:none; flex-direction:column; gap:12px;
+}
+.addpanel.show{display:flex;}
+.addpanel h3{margin:0 0 4px; font-family:'IBM Plex Mono', monospace; font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent);}
+.addpanel label{font-size:12px; color:var(--ink-dim); margin-bottom:4px; display:block;}
+.field{margin-bottom:2px;}
+.addpanel input[type=text], .addpanel textarea, .addpanel select{
+  width:100%; background:var(--panel-2); border:1px solid var(--border); border-radius:8px;
+  color:var(--ink); padding:11px 12px; font-family:'Manrope',sans-serif; font-size:16px; resize:vertical;
+}
+.addpanel textarea{min-height:56px;}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.optrow{display:flex; gap:8px; align-items:center;}
+.optrow input[type=text]{flex:1; min-width:0;}
+.optrow input[type=radio]{accent-color:var(--accent); width:20px; height:20px; flex-shrink:0;}
+.addstatus{font-size:12px; color:var(--good); min-height:16px;}
+
+footer{text-align:center; margin-top:24px; font-size:11px; color:var(--ink-dim); font-family:'IBM Plex Mono', monospace;}
+
+.gearbtn{
+  background:none; border:1px solid var(--border); color:var(--ink-dim); border-radius:8px;
+  width:36px; height:36px; cursor:pointer; font-size:16px; line-height:1; padding:0;
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.gearbtn:hover{color:var(--accent); border-color:var(--accent);}
+.modal-backdrop{
+  display:none; position:fixed; inset:0; background:rgba(3,7,15,0.75); z-index:50;
+  align-items:center; justify-content:center; padding:20px;
+}
+.modal-backdrop.show{display:flex;}
+.modal{
+  background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  padding:24px; max-width:420px; width:100%; display:flex; flex-direction:column; gap:12px;
+}
+.modal h3{margin:0; font-family:'IBM Plex Mono', monospace; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent);}
+.modal input[type=password], .modal select{
+  width:100%; background:var(--panel-2); border:1px solid var(--border); border-radius:8px;
+  color:var(--ink); padding:11px 12px; font-family:'IBM Plex Mono',monospace; font-size:16px;
+}
+.key-banner{
+  background:rgba(255,180,84,0.1); border:1px solid var(--amber); color:var(--amber);
+  border-radius:10px; padding:12px 14px; font-size:12.5px; margin-bottom:16px; display:none;
+  align-items:center; justify-content:space-between; gap:10px;
+}
+.key-banner.show{display:flex;}
+.key-banner button{
+  background:var(--amber); color:#3a2405; border:none; border-radius:6px; padding:6px 12px;
+  font-weight:700; font-size:12px; cursor:pointer; flex-shrink:0;
+}
+
+.uploadpanel{
+  background:var(--panel); border:1px solid var(--border); border-radius:14px;
+  padding:22px; display:none; flex-direction:column; gap:14px;
+}
+.uploadpanel.show{display:flex;}
+.uploadpanel h3{margin:0; font-family:'IBM Plex Mono', monospace; font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent);}
+.uploadpanel .hint-text{font-size:12.5px; color:var(--ink-dim); margin:-8px 0 0;}
+.dropzone{
+  border:1.5px dashed var(--border); border-radius:10px; padding:16px; text-align:center;
+  cursor:pointer; font-size:13px; color:var(--ink-dim); transition:border-color .15s;
+}
+.dropzone:hover{border-color:var(--accent-dim); color:var(--ink);}
+.dropzone.has-files{border-color:var(--accent); color:var(--accent);}
+.dropzone input{display:none;}
+.extract-status{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-dim); min-height:16px;}
+
+.spinner{
+  display:inline-block; width:16px; height:16px; border-radius:50%;
+  border:2px solid var(--border); border-top-color:var(--accent);
+  animation:spin 0.7s linear infinite; flex-shrink:0;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.review-list{display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto;}
+.review-item{
+  background:var(--panel-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+}
+.review-item .ri-q{font-size:14px; font-weight:600; margin-bottom:10px; line-height:1.5;}
+.review-item .ri-opts{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;}
+.review-item .ri-opt{display:flex; align-items:center; gap:8px; font-size:13px;}
+.review-item .ri-opt input{accent-color:var(--accent);}
+.review-item .ri-opt.needs-review{color:var(--amber);}
+.review-item .ri-meta{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;}
+.review-item .ri-meta select, .review-item .ri-meta input{
+  background:var(--panel); border:1px solid var(--border); border-radius:6px; color:var(--ink);
+  font-size:16px; padding:6px 8px; font-family:'Manrope',sans-serif; min-width:0; flex:1 1 120px;
+}
+.review-item .ri-discard{
+  font-size:11px; color:var(--bad); background:none; border:none; cursor:pointer; margin-left:auto;
+}
+.flag-review{
+  display:inline-block; font-size:10px; color:var(--amber); border:1px solid var(--amber);
+  border-radius:8px; padding:1px 7px; margin-bottom:8px; font-family:'IBM Plex Mono',monospace;
+}
+
+@media (max-width:480px){
+  .qtext{font-size:16px;}
+  .card{padding:20px 16px;}
+  header{flex-direction:column; align-items:stretch;}
+  .wordmark{text-align:center;}
+  .stats{justify-content:center;}
+  .exam-toggle{order:-1; width:100%; justify-content:center;}
+  .row2{grid-template-columns:1fr;}
+  .actionbar{gap:8px;}
+  .actionbar .btn{flex:1 1 auto;}
+  button.btn.next{margin-left:0;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="wordmark" id="wordmark">JEE<span>://console</span></div>
+    <div class="stats" id="statsBar">
+      <div class="exam-toggle" id="examToggle">
+        <button data-mode="JEE" id="examBtnJEE">JEE</button>
+        <button data-mode="NEET" id="examBtnNEET">NEET</button>
+      </div>
+      <span>ACC <b id="statAcc">0%</b></span>
+      <span>DONE <b id="statDone">0</b></span>
+      <span>STREAK <b id="statStreak">0</b></span>
+      <button class="gearbtn" id="gearBtn" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <div class="modal-backdrop" id="settingsBackdrop">
+    <div class="modal" id="settingsModal">
+      <h3>AI Settings</h3>
+      <p class="hint-text">Hints and explanations run through the app's own AI backend — no setup needed. Each device gets a daily free allowance.</p>
+      <div class="field">
+        <label>Today's usage</label>
+        <div id="usageDisplay" style="font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--accent);">— / —</div>
+      </div>
+      <div class="field">
+        <label>Model</label>
+        <select id="modelSelect">
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (recommended)</option>
+          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (faster, lighter)</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn primary" id="saveKeyBtn">Save</button>
+        <button class="btn ghost" id="closeSettingsBtn">Close</button>
+        <span class="addstatus" id="keyStatus"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="homeView">
+    <div class="key-banner" id="keyBanner">
+      <span id="keyBannerText">Daily free AI limit reached — try again tomorrow, or check ⚙ Settings.</span>
+    </div>
+    <div class="home-grid" id="homeGrid"></div>
+  </div>
+
+  <div id="practiceView" class="hidden">
+  <button class="backbtn" id="backBtn">← Subjects</button>
+  <div class="tabs" id="subjectTabs"></div>
+
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <div class="card" id="questionCard">
+    <div class="eyebrow">
+      <span class="qid" id="qId">Q001</span>
+      <span id="qMeta"></span>
+      <span class="diff Medium" id="qDiff">Medium</span>
+    </div>
+    <div class="qtext" id="qText">Loading...</div>
+    <div class="options" id="optionsList"></div>
+
+    <div class="result-banner" id="resultBanner"></div>
+    <div class="console" id="console"><span class="tag" id="consoleTag">AI TUTOR</span><span id="consoleBody"></span></div>
+
+    <div class="actionbar">
+      <button class="btn" id="hintBtn">💡 Hint</button>
+      <button class="btn primary" id="submitBtn" disabled>Submit</button>
+      <button class="btn ghost" id="explainBtn" style="display:none;">Full solution</button>
+      <button class="btn next" id="nextBtn" style="display:none;">Next →</button>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:16px;">
+    <button class="btn ghost" id="toggleAdd">+ Add question from your book</button>
+  </div>
+
+  <div class="addpanel" id="addPanel">
+    <h3>New question</h3>
+    <div class="row2">
+      <div class="field">
+        <label>Subject</label>
+        <select id="newSubject"></select>
+      </div>
+      <div class="field">
+        <label>Chapter</label>
+        <input type="text" id="newChapter" placeholder="e.g. Kinematics" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Question</label>
+      <textarea id="newQText" placeholder="Paste the question text..."></textarea>
+    </div>
+    <div class="field">
+      <label>Options — mark the correct one</label>
+      <div class="optrow"><input type="radio" name="correctOpt" value="0" checked><input type="text" id="opt0" placeholder="Option A"></div>
+      <div class="optrow"><input type="radio" name="correctOpt" value="1"><input type="text" id="opt1" placeholder="Option B"></div>
+      <div class="optrow"><input type="radio" name="correctOpt" value="2"><input type="text" id="opt2" placeholder="Option C"></div>
+      <div class="optrow"><input type="radio" name="correctOpt" value="3"><input type="text" id="opt3" placeholder="Option D"></div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="btn primary" id="saveQBtn">Save question</button>
+      <span class="addstatus" id="addStatus"></span>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:10px;">
+    <button class="btn ghost" id="toggleUpload">📷 Upload photos of questions</button>
+  </div>
+
+  <div class="uploadpanel" id="uploadPanel">
+    <h3>Extract from photos</h3>
+    <p class="hint-text">Upload photos of the question page(s), and optionally the answer key page. The AI reads them and drafts questions for you to check before saving.</p>
+    <div class="row2">
+      <div class="field">
+        <label>Default subject for this batch</label>
+        <select id="uploadSubject"></select>
+      </div>
+      <div class="field">
+        <label>Chapter (optional)</label>
+        <input type="text" id="uploadChapter" placeholder="e.g. Thermodynamics" />
+      </div>
+    </div>
+    <label class="dropzone" id="qDropzone">
+      📄 Click to choose question page photo(s) — multiple allowed
+      <input type="file" id="qFiles" accept="image/*" multiple>
+    </label>
+    <label class="dropzone" id="keyDropzone">
+      🔑 Click to choose answer key photo (optional)
+      <input type="file" id="keyFiles" accept="image/*" multiple>
+    </label>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="btn primary" id="extractBtn">Extract questions</button>
+      <span class="spinner" id="extractSpinner" style="display:none;"></span>
+      <span class="extract-status" id="extractStatus"></span>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+    <div id="reviewActions" style="display:none; gap:10px; align-items:center;">
+      <button class="btn primary" id="saveAllBtn">Save all to bank</button>
+      <span class="addstatus" id="reviewStatus"></span>
+    </div>
+  </div>
+  </div>
+
+  <footer>hints &amp; explanations generated live · progress saved to this device</footer>
+</div>
+
+<script>
+// --- Standalone-app storage shim: mimics the window.storage API using localStorage ---
+window.storage = {
+  async get(key){
+    const v = localStorage.getItem('jee:'+key);
+    if(v===null) throw new Error('not found');
+    return {key, value:v};
+  },
+  async set(key, value){
+    localStorage.setItem('jee:'+key, value);
+    return {key, value};
+  },
+  async delete(key){
+    localStorage.removeItem('jee:'+key);
+    return {key, deleted:true};
+  }
+};
+
+function getDeviceId(){
+  let id = localStorage.getItem('jee:device-id');
+  if(!id){
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+    localStorage.setItem('jee:device-id', id);
+  }
+  return id;
+}
+function getModel(){ return localStorage.getItem('jee:model') || 'gemini-2.5-flash'; }
+
+let lastQuota = null; // {used, limit} from most recent backend response
+
+function showLimitBanner(msg){
+  const banner = document.getElementById('keyBanner');
+  const text = document.getElementById('keyBannerText');
+  if(text && msg) text.textContent = msg;
+  if(banner) banner.classList.add('show');
+}
+function hideLimitBanner(){
+  const banner = document.getElementById('keyBanner');
+  if(banner) banner.classList.remove('show');
+}
+
+async function refreshUsage(){
+  try{
+    const res = await fetch('/api/usage', { headers:{ 'x-device-id': getDeviceId() } });
+    const data = await res.json();
+    lastQuota = data;
+    const disp = document.getElementById('usageDisplay');
+    if(disp) disp.textContent = `${data.used} / ${data.limit} AI calls today`;
+    if(data.used >= data.limit){
+      showLimitBanner(`Daily free AI limit reached (${data.limit}/day) — resets tomorrow.`);
+    } else {
+      hideLimitBanner();
+    }
+  }catch(e){ /* non-fatal */ }
+}
+
+function openSettings(){
+  document.getElementById('modelSelect').value = getModel();
+  document.getElementById('settingsBackdrop').classList.add('show');
+  refreshUsage();
+}
+function closeSettings(){
+  document.getElementById('settingsBackdrop').classList.remove('show');
+}
+
+const SUBJECTS_BY_EXAM = {
+  JEE: ['Physics','Chemistry','Maths'],
+  NEET: ['Physics','Chemistry','Biology']
+};
+
+let questions = [];
+let customQuestions = [];
+let filtered = [];
+let currentIndex = 0;
+let currentSubjectFilter = 'All';
+let selectedOpt = null;
+let locked = false;
+let progress = { attempted:0, correct:0, streak:0, bySubject:{} };
+let cache = {};
+
+const el = id => document.getElementById(id);
+const SUBJECT_ICONS = { Physics:'φ', Chemistry:'⚗', Maths:'∑', Biology:'❁' };
+
+function getExamMode(){ return localStorage.getItem('jee:exam-mode') || 'JEE'; }
+function setExamMode(mode){
+  localStorage.setItem('jee:exam-mode', mode);
+  applyExamMode();
+}
+function currentSubjectList(){ return SUBJECTS_BY_EXAM[getExamMode()]; }
+function examLabel(){ return getExamMode()==='NEET' ? 'NEET (medical entrance)' : 'JEE (IIT-JEE)'; }
+
+function applyExamMode(){
+  const mode = getExamMode();
+  el('examBtnJEE').classList.toggle('active', mode==='JEE');
+  el('examBtnNEET').classList.toggle('active', mode==='NEET');
+  el('wordmark').innerHTML = mode + '<span>://console</span>';
+  // Only show questions whose subject belongs to the current exam (Physics/Chemistry are
+  // shared between both; Maths is JEE-only, Biology is NEET-only).
+  questions = customQuestions.filter(q => currentSubjectList().includes(q.subject));
+  populateSubjectDropdowns();
+  renderHome();
+}
+
+function populateSubjectDropdowns(){
+  const subjects = currentSubjectList();
+  const optionsHtml = subjects.map(s=>`<option>${s}</option>`).join('');
+  el('newSubject').innerHTML = optionsHtml;
+  el('uploadSubject').innerHTML = optionsHtml;
+}
+
+el('examBtnJEE').onclick = ()=> setExamMode('JEE');
+el('examBtnNEET').onclick = ()=> setExamMode('NEET');
+
+async function loadState(){
+  try{
+    const r = await window.storage.get('custom-questions');
+    customQuestions = r ? JSON.parse(r.value) : [];
+  }catch(e){ customQuestions = []; }
+  try{
+    const r = await window.storage.get('progress');
+    if(r) progress = JSON.parse(r.value);
+    if(!progress.bySubject) progress.bySubject = {};
+  }catch(e){}
+  applyExamMode();
+}
+
+function renderHome(){
+  const subjects = currentSubjectList();
+  const grid = el('homeGrid');
+  grid.innerHTML = '';
+  subjects.forEach(s=>{
+    const count = questions.filter(q=>q.subject===s).length;
+    const stat = progress.bySubject[s] || {attempted:0, correct:0};
+    const acc = stat.attempted ? Math.round(100*stat.correct/stat.attempted)+'%' : '—';
+    const card = document.createElement('button');
+    card.className = 'subject-card ' + s;
+    card.innerHTML = `
+      <div class="sc-left">
+        <div class="sc-icon">${SUBJECT_ICONS[s] || s[0]}</div>
+        <div>
+          <div class="sc-title">${s}</div>
+          <div class="sc-sub">${count} question${count===1?'':'s'}</div>
+        </div>
+      </div>
+      <div class="sc-acc"><b>${acc}</b>accuracy</div>`;
+    card.onclick = ()=> enterSubject(s);
+    grid.appendChild(card);
+  });
+  const allStat = progress;
+  const allAcc = allStat.attempted ? Math.round(100*allStat.correct/allStat.attempted)+'%' : '—';
+  const mixed = document.createElement('button');
+  mixed.className = 'subject-card All';
+  mixed.innerHTML = `
+      <div class="sc-left">
+        <div class="sc-icon">✦</div>
+        <div>
+          <div class="sc-title">Mixed practice</div>
+          <div class="sc-sub">${questions.length} question${questions.length===1?'':'s'} · all subjects</div>
+        </div>
+      </div>
+      <div class="sc-acc"><b>${allAcc}</b>accuracy</div>`;
+  mixed.onclick = ()=> enterSubject('All');
+  grid.appendChild(mixed);
+}
+
+function enterSubject(subject){
+  el('homeView').classList.add('hidden');
+  el('practiceView').classList.remove('hidden');
+  buildTabs();
+  applyFilter(subject);
+}
+
+el('backBtn').onclick = ()=>{
+  el('practiceView').classList.add('hidden');
+  el('homeView').classList.remove('hidden');
+  renderHome();
+};
+
+async function saveProgress(){
+  try{ await window.storage.set('progress', JSON.stringify(progress)); }catch(e){}
+}
+async function saveCustomQuestions(){
+  try{ await window.storage.set('custom-questions', JSON.stringify(customQuestions)); }catch(e){}
+}
+async function getCache(id){
+  try{
+    const r = await window.storage.get('cache:'+id);
+    return r ? JSON.parse(r.value) : {};
+  }catch(e){ return {}; }
+}
+async function setCache(id, obj){
+  try{ await window.storage.set('cache:'+id, JSON.stringify(obj)); }catch(e){}
+}
+
+function buildTabs(){
+  const subjects = ['All', ...new Set(questions.map(q=>q.subject))];
+  const tabsEl = el('subjectTabs');
+  tabsEl.innerHTML = '';
+  subjects.forEach(s=>{
+    const b = document.createElement('button');
+    b.className = 'tab' + (s===currentSubjectFilter?' active':'');
+    b.textContent = s;
+    b.onclick = ()=>applyFilter(s);
+    tabsEl.appendChild(b);
+  });
+}
+
+function applyFilter(subject){
+  currentSubjectFilter = subject;
+  filtered = subject==='All' ? questions : questions.filter(q=>q.subject===subject);
+  currentIndex = 0;
+  buildTabs();
+  if(filtered.length===0){
+    el('qText').textContent = 'No questions in this subject yet — add one below.';
+    el('optionsList').innerHTML='';
+    return;
+  }
+  loadQuestion();
+}
+
+function renderStats(){
+  el('statDone').textContent = progress.attempted;
+  el('statStreak').textContent = progress.streak;
+  el('statAcc').textContent = progress.attempted ? Math.round(100*progress.correct/progress.attempted)+'%' : '0%';
+  const pct = filtered.length ? Math.round(100*(currentIndex)/filtered.length) : 0;
+  el('progressFill').style.width = pct+'%';
+}
+
+function loadQuestion(){
+  selectedOpt = null; locked = false;
+  const q = filtered[currentIndex];
+  el('qId').textContent = 'Q'+String(currentIndex+1).padStart(3,'0')+' / '+filtered.length;
+  el('qMeta').textContent = q.subject + ' · ' + (q.chapter||'');
+  el('qDiff').textContent = q.difficulty||'Medium';
+  el('qDiff').className = 'diff ' + (q.difficulty||'Medium');
+  el('qText').textContent = q.text;
+  const list = el('optionsList');
+  list.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt,i)=>{
+    const d = document.createElement('div');
+    d.className = 'opt';
+    d.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    d.onclick = ()=>selectOption(i);
+    list.appendChild(d);
+  });
+  el('submitBtn').disabled = true;
+  el('explainBtn').style.display = 'none';
+  el('nextBtn').style.display = 'none';
+  el('resultBanner').className = 'result-banner';
+  el('console').className = 'console';
+  el('hintBtn').disabled = false;
+  renderStats();
+}
+
+function selectOption(i){
+  if(locked) return;
+  selectedOpt = i;
+  [...el('optionsList').children].forEach((d,idx)=>{
+    d.classList.toggle('selected', idx===i);
+  });
+  el('submitBtn').disabled = false;
+}
+
+async function callBackend(content, max_tokens=1000){
+  const res = await fetch('/api/ai', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-device-id': getDeviceId()
+    },
+    body: JSON.stringify({ model: getModel(), max_tokens, content })
+  });
+  if(res.status === 429){
+    const data = await res.json().catch(()=>({}));
+    showLimitBanner(data.message || 'Daily free AI limit reached — try again tomorrow.');
+    throw new Error('RATE_LIMIT');
+  }
+  const data = await res.json();
+  if(data.error){ throw new Error(data.error); }
+  if(typeof data.used === 'number') refreshUsage();
+  const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  return text || 'No response.';
+}
+
+async function callClaude(prompt){
+  return callBackend([{type:'text', text: prompt}], 1000);
+}
+
+function typeIntoConsole(text, tag){
+  el('console').classList.add('show');
+  el('consoleTag').textContent = tag;
+  const body = el('consoleBody');
+  body.innerHTML = '';
+  let i = 0;
+  const speed = Math.max(4, Math.min(14, Math.floor(1200/text.length)));
+  function step(){
+    body.textContent = text.slice(0,i);
+    if(i < text.length){
+      i++;
+      setTimeout(step, speed);
+    }
+  }
+  step();
+}
+
+el('hintBtn').onclick = async ()=>{
+  const q = filtered[currentIndex];
+  el('hintBtn').disabled = true;
+  const c = await getCache(q.id);
+  if(c.hint){
+    typeIntoConsole(c.hint, 'AI TUTOR · HINT');
+    return;
+  }
+  el('console').classList.add('show');
+  el('consoleTag').textContent = 'AI TUTOR · HINT';
+  el('consoleBody').innerHTML = 'thinking<span class="cursor"></span>';
+  try{
+    const letters = ['A','B','C','D'];
+    const prompt = `You are a friendly ${examLabel()} tutor for a student who finds this topic hard. Use very simple, plain words — imagine explaining to a Class 11 student on their first attempt at this topic. Avoid jargon; if you must use a technical term, explain it in one short phrase right after. Short sentences. One idea per sentence. Give ONLY a short hint (max 2 sentences) that nudges the student toward the correct method for this question, WITHOUT revealing the final answer or doing the full calculation. Do not state which option is correct.\n\nQuestion: ${q.text}\nOptions: ${q.options.map((o,i)=>letters[i]+') '+o).join(', ')}`;
+    const hint = await callClaude(prompt);
+    c.hint = hint;
+    await setCache(q.id, c);
+    typeIntoConsole(hint, 'AI TUTOR · HINT');
+  }catch(e){
+    el('consoleBody').textContent = e.message==='RATE_LIMIT' ? 'Daily free AI limit reached — try again tomorrow.' : ('Could not reach the tutor: ' + e.message);
+  }
+  el('hintBtn').disabled = false;
+};
+
+el('submitBtn').onclick = async ()=>{
+  if(selectedOpt===null || locked) return;
+  locked = true;
+  const q = filtered[currentIndex];
+  const letters = ['A','B','C','D'];
+  const opts = [...el('optionsList').children];
+  opts.forEach(o=>o.classList.add('locked'));
+  const isCorrect = selectedOpt === q.correct;
+
+  opts[q.correct].classList.add('correct');
+  if(!isCorrect) opts[selectedOpt].classList.add('wrong');
+
+  const banner = el('resultBanner');
+  banner.className = 'result-banner ' + (isCorrect ? 'correct' : 'wrong');
+  banner.textContent = isCorrect ? '✓ Correct' : `✗ Not quite — correct answer is ${letters[q.correct]}`;
+
+  progress.attempted++;
+  if(isCorrect){ progress.correct++; progress.streak++; } else { progress.streak = 0; }
+  if(!progress.bySubject[q.subject]) progress.bySubject[q.subject] = {attempted:0, correct:0};
+  progress.bySubject[q.subject].attempted++;
+  if(isCorrect) progress.bySubject[q.subject].correct++;
+  await saveProgress();
+  renderStats();
+
+  el('submitBtn').disabled = true;
+  el('explainBtn').style.display = 'inline-block';
+  el('nextBtn').style.display = 'inline-block';
+
+  if(!isCorrect){
+    await showExplanation(q, selectedOpt);
+  }
+};
+
+async function showExplanation(q, chosenIdx){
+  const letters = ['A','B','C','D'];
+  el('console').classList.add('show');
+  el('consoleTag').textContent = 'AI TUTOR · EXPLANATION';
+  el('consoleBody').innerHTML = 'working through it<span class="cursor"></span>';
+  const c = await getCache(q.id);
+  if(c.explanation){
+    typeIntoConsole(c.explanation, 'AI TUTOR · EXPLANATION');
+    return;
+  }
+  try{
+    const prompt = `You are a patient ${examLabel()} tutor explaining to a student who is struggling with this topic. Use very simple, everyday words — write like you're talking to a Class 11 student, not writing a textbook. Short sentences, one step per line, numbered. Name the key formula or concept up front in plain words before using any symbols. If a technical term is unavoidable, explain what it means in a few plain words right next to it. A relatable everyday comparison is welcome if it makes a concept click. A student attempted this question${chosenIdx!==undefined ? ` and chose option ${letters[chosenIdx]}` : ''}. The correct answer is option ${letters[q.correct]}. Give a clear, simple, step-by-step explanation (numbered steps, plain text, no LaTeX symbols) of how to solve it correctly, and briefly and kindly point out the likely mistake in the student's approach if their choice was wrong. Keep it under 150 words.\n\nQuestion: ${q.text}\nOptions: ${q.options.map((o,i)=>letters[i]+') '+o).join(', ')}`;
+    const explanation = await callClaude(prompt);
+    c.explanation = explanation;
+    await setCache(q.id, c);
+    typeIntoConsole(explanation, 'AI TUTOR · EXPLANATION');
+  }catch(e){
+    el('consoleBody').textContent = e.message==='RATE_LIMIT' ? 'Daily free AI limit reached — try again tomorrow.' : ('Could not reach the tutor: ' + e.message);
+  }
+}
+
+el('explainBtn').onclick = ()=> showExplanation(filtered[currentIndex], selectedOpt);
+
+el('nextBtn').onclick = ()=>{
+  currentIndex = (currentIndex+1) % filtered.length;
+  loadQuestion();
+};
+
+el('toggleAdd').onclick = ()=>{
+  el('addPanel').classList.toggle('show');
+};
+
+el('toggleUpload').onclick = ()=>{
+  el('uploadPanel').classList.toggle('show');
+};
+
+function compressImageToBase64(file, maxDim=1500, quality=0.82){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error(`Could not read "${file.name}".`));
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error(`Could not open "${file.name}" — if it's a HEIC/iPhone photo, try converting it to JPG first or take the photo with "Most Compatible" format enabled.`));
+      img.onload = ()=>{
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+el('qFiles').onchange = ()=>{
+  el('qDropzone').classList.toggle('has-files', el('qFiles').files.length>0);
+  el('qDropzone').textContent = el('qFiles').files.length
+    ? `✓ ${el('qFiles').files.length} question photo(s) selected`
+    : '📄 Click to choose question page photo(s) — multiple allowed';
+};
+el('keyFiles').onchange = ()=>{
+  el('keyDropzone').classList.toggle('has-files', el('keyFiles').files.length>0);
+  el('keyDropzone').textContent = el('keyFiles').files.length
+    ? `✓ ${el('keyFiles').files.length} answer key photo(s) selected`
+    : '🔑 Click to choose answer key photo (optional)';
+};
+
+let pendingExtracted = [];
+
+el('extractBtn').onclick = async ()=>{
+  const qFiles = [...el('qFiles').files];
+  const keyFiles = [...el('keyFiles').files];
+  const status = el('extractStatus');
+  const spinner = el('extractSpinner');
+  if(qFiles.length===0){
+    status.style.color = 'var(--bad)';
+    status.textContent = 'Choose at least one question photo first.';
+    return;
+  }
+  status.style.color = 'var(--ink-dim)';
+  status.textContent = 'Reading photos...';
+  spinner.style.display = 'inline-block';
+  el('extractBtn').disabled = true;
+  el('reviewList').innerHTML = '';
+  el('reviewActions').style.display = 'none';
+
+  try{
+    const imageBlocks = [];
+    for(const f of qFiles){
+      status.textContent = `Compressing photo ${imageBlocks.length+1} of ${qFiles.length+keyFiles.length}...`;
+      const data = await compressImageToBase64(f);
+      imageBlocks.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data}});
+    }
+    for(const f of keyFiles){
+      status.textContent = `Compressing photo ${imageBlocks.length+1} of ${qFiles.length+keyFiles.length}...`;
+      const data = await compressImageToBase64(f);
+      imageBlocks.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data}});
+    }
+    status.textContent = 'Asking the AI to read the questions...';
+    const instruction = {
+      type:'text',
+      text: `The first image(s) are pages of multiple-choice questions from a ${examLabel()} prep book${keyFiles.length? '; the last image(s) are the answer key for those questions' : ''}. Extract EVERY multiple-choice question you can read clearly. ${keyFiles.length? 'Use the answer key to determine the correct option index for each question when possible.' : 'If you cannot determine the correct answer, set "correct" to null.'}\n\nRespond with ONLY valid JSON (no markdown fences, no commentary), in exactly this shape:\n[{"text":"question text","options":["opt A","opt B","opt C","opt D"],"correct": 0-3 or null,"chapter":"best-guess topic or empty string"}]`
+    };
+    let text = await callBackend([...imageBlocks, instruction], 4000);
+    text = text.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    let parsed;
+    try{ parsed = JSON.parse(text); }catch(e){ throw new Error('Could not parse a clean list of questions from those photos. Try clearer/closer photos.'); }
+    if(!Array.isArray(parsed) || parsed.length===0){
+      throw new Error('No questions were recognized in those photos.');
+    }
+    pendingExtracted = parsed.map((q,i)=>({
+      _uid: 'x'+Date.now()+'_'+i,
+      subject: el('uploadSubject').value,
+      chapter: q.chapter || el('uploadChapter').value.trim(),
+      difficulty:'Medium',
+      text: q.text || '',
+      options: Array.isArray(q.options) && q.options.length===4 ? q.options : ['','','',''],
+      correct: (typeof q.correct === 'number' && q.correct>=0 && q.correct<=3) ? q.correct : null
+    }));
+    renderReviewList();
+    status.style.color = 'var(--good)';
+    status.textContent = `Found ${pendingExtracted.length} question(s) — check answers below, then save.`;
+  }catch(e){
+    status.style.color = 'var(--bad)';
+    status.textContent = e.message==='RATE_LIMIT' ? 'Daily free AI limit reached — try again tomorrow.' : (e.message || 'Something went wrong reading those photos.');
+  }
+  spinner.style.display = 'none';
+  el('extractBtn').disabled = false;
+};
+
+function renderReviewList(){
+  const list = el('reviewList');
+  list.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  pendingExtracted.forEach((q, idx)=>{
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    const needsReview = q.correct === null;
+    item.innerHTML = `
+      ${needsReview ? '<span class="flag-review">⚠ pick correct answer</span>' : ''}
+      <div class="ri-q">${q.text || '(could not read question text — edit below)'}</div>
+      <div class="ri-opts">
+        ${q.options.map((o,i)=>`
+          <label class="ri-opt ${needsReview?'needs-review':''}">
+            <input type="radio" name="ri-correct-${idx}" value="${i}" ${q.correct===i?'checked':''}>
+            ${letters[i]}) ${o}
+          </label>`).join('')}
+      </div>
+      <div class="ri-meta">
+        <select class="ri-subject" data-idx="${idx}">
+          ${currentSubjectList().map(s=>`<option ${q.subject===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <input type="text" class="ri-chapter" data-idx="${idx}" value="${q.chapter||''}" placeholder="chapter">
+        <button class="ri-discard" data-idx="${idx}">discard</button>
+      </div>`;
+    list.appendChild(item);
+  });
+  [...list.querySelectorAll('.ri-discard')].forEach(btn=>{
+    btn.onclick = ()=>{
+      const i = parseInt(btn.dataset.idx,10);
+      pendingExtracted.splice(i,1);
+      renderReviewList();
+    };
+  });
+  el('reviewActions').style.display = pendingExtracted.length ? 'flex' : 'none';
+}
+
+el('saveAllBtn').onclick = async ()=>{
+  const list = el('reviewList');
+  const items = [...list.querySelectorAll('.review-item')];
+  let saved = 0;
+  items.forEach((item, idx)=>{
+    const q = pendingExtracted[idx];
+    if(!q) return;
+    const checked = item.querySelector(`input[name="ri-correct-${idx}"]:checked`);
+    const subjectSel = item.querySelector('.ri-subject');
+    const chapterInp = item.querySelector('.ri-chapter');
+    const newQ = {
+      id: 'c'+Date.now()+'_'+idx,
+      subject: subjectSel.value,
+      chapter: chapterInp.value.trim(),
+      difficulty:'Medium',
+      text: q.text,
+      options: q.options,
+      correct: checked ? parseInt(checked.value,10) : 0
+    };
+    customQuestions.push(newQ);
+    questions.push(newQ);
+    saved++;
+  });
+  await saveCustomQuestions();
+  pendingExtracted = [];
+  el('reviewList').innerHTML = '';
+  el('reviewActions').style.display = 'none';
+  el('reviewStatus').style.color = 'var(--good)';
+  el('reviewStatus').textContent = `Saved ${saved} question(s) to your bank.`;
+  el('qFiles').value=''; el('keyFiles').value='';
+  el('qDropzone').classList.remove('has-files');
+  el('qDropzone').textContent = '📄 Click to choose question page photo(s) — multiple allowed';
+  el('keyDropzone').classList.remove('has-files');
+  el('keyDropzone').textContent = '🔑 Click to choose answer key photo (optional)';
+  renderHome();
+  setTimeout(()=>{ el('reviewStatus').textContent=''; }, 3000);
+};
+
+el('saveQBtn').onclick = async ()=>{
+  const subject = el('newSubject').value;
+  const chapter = el('newChapter').value.trim();
+  const text = el('newQText').value.trim();
+  const opts = [el('opt0').value.trim(), el('opt1').value.trim(), el('opt2').value.trim(), el('opt3').value.trim()];
+  const correctRadio = document.querySelector('input[name=correctOpt]:checked');
+  const status = el('addStatus');
+
+  if(!text || opts.some(o=>!o)){
+    status.style.color = 'var(--bad)';
+    status.textContent = 'Fill in the question and all 4 options.';
+    return;
+  }
+  const newQ = {
+    id: 'c'+Date.now(),
+    subject, chapter, difficulty:'Medium',
+    text, options: opts, correct: parseInt(correctRadio.value,10)
+  };
+  customQuestions.push(newQ);
+  questions.push(newQ);
+  await saveCustomQuestions();
+
+  status.style.color = 'var(--good)';
+  status.textContent = 'Saved — added to your bank.';
+  el('newChapter').value=''; el('newQText').value='';
+  el('opt0').value=''; el('opt1').value=''; el('opt2').value=''; el('opt3').value='';
+
+  buildTabs();
+  applyFilter(currentSubjectFilter);
+  setTimeout(()=>{ status.textContent=''; }, 2500);
+};
+
+window.addEventListener('error', (e)=>{
+  const status = document.getElementById('extractStatus');
+  if(status && document.getElementById('uploadPanel').classList.contains('show')){
+    status.style.color = 'var(--bad)';
+    status.textContent = 'Something went wrong: ' + (e.message || 'unknown error') + '. Try again.';
+  }
+});
+
+el('gearBtn').onclick = openSettings;
+el('closeSettingsBtn').onclick = closeSettings;
+el('settingsBackdrop').onclick = (e)=>{ if(e.target.id==='settingsBackdrop') closeSettings(); };
+
+el('saveKeyBtn').onclick = ()=>{
+  const model = el('modelSelect').value;
+  localStorage.setItem('jee:model', model);
+  el('keyStatus').style.color = 'var(--good)';
+  el('keyStatus').textContent = 'Saved.';
+  setTimeout(closeSettings, 500);
+};
+
+getDeviceId();
+refreshUsage();
+loadState();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
